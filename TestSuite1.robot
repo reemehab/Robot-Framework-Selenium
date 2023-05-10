@@ -7,6 +7,7 @@ ${Sleep Time}     2
 ${Advanced Search}    ${EMPTY}
 ${StartYear}      2010
 ${EndYear}        2020
+${MovieName}      The Shawshank Redemption
 
 *** Test Cases ***
 TestCase3
@@ -47,4 +48,43 @@ TestCase3
     Log List    ${copied_Ratings}
     Lists Should Be Equal    ${copied_Ratings}    ${Rating_values}
     Sleep    ${Sleep Time}
+    [Teardown]    Close Browser
+
+TestCase1
+    [Setup]    Open Browser    https://www.imdb.com/    Chrome
+    wait until page contains Element    id=suggestion-search
+    input text    id=suggestion-search    ${MovieName}
+    Sleep    ${Sleep Time}
+    click element    id=iconContext-magnify
+    Sleep    ${Sleep Time}
+    Wait Until Page Contains Element    xpath://*[@id="__next"]/main/div[2]/div[3]/section/div/div[1]/section[1]/h1
+    ${search_results} =    Get WebElements    class:ipc-metadata-list-summary-item__t
+    FOR    ${result}    IN    @{search_results}
+        Element Should Contain    ${result}    ${MovieName}
+    END
+    Element Text Should Be    xpath://*[@id="__next"]/main/div[2]/div[3]/section/div/div[1]/section[2]/div[2]/ul/li[1]/div[2]/div/a    ${MovieName}
+    [Teardown]    Close Browser
+
+TestCase2
+    [Setup]    Open Browser    https://www.imdb.com/    Chrome
+    wait until page contains Element    id=suggestion-search
+    click element    xpath://*[@id="iconContext-menu"]
+    Sleep    ${Sleep Time}
+    click element    xpath://*[@id="imdbHeader"]/div[2]/aside/div/div[2]/div/div[1]/span/div/div/ul/a[2]/span
+    wait until page contains element    xpath://*[@id="main"]/div/span/div/div/div[3]/table/tbody/tr[106]/td[2]
+    Sleep    ${Sleep Time}
+    ${rating_elements} =    Get WebElements    class:ratingColumn imdbRating
+    ${rating_elements_count} =    Get Element Count    class:ratingColumn imdbRating
+    Log    ${rating_elements_count}
+    ${original_ratings}=    Create List
+    FOR    ${rating_element}    IN    @{rating_elements}
+        ${rating_attr}    get text    ${rating_element}
+        ${rating_attr}    convert to number    ${rating_attr.strip('$')}
+        append to list    ${original_ratings}    ${rating_attr}
+        log    ${rating_attr}
+    END
+    ${copied_ratings}=    Copy List    ${original_ratings}
+    Sort List    ${copied_ratings}
+    reverse list    ${copied_ratings}
+    Lists Should Be Equal    ${copied_ratings}    ${original_ratings}
     [Teardown]    Close Browser
