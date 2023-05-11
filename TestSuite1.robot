@@ -8,6 +8,7 @@ ${Advanced Search}    ${EMPTY}
 ${StartYear}      2010
 ${EndYear}        2020
 ${MovieName}      The Shawshank Redemption
+${GenreAction}    action
 
 *** Test Cases ***
 TestCase3
@@ -48,10 +49,19 @@ TestCase3
     Log List    ${copied_Ratings}
     Lists Should Be Equal    ${copied_Ratings}    ${Rating_values}
     Sleep    ${Sleep Time}
+    ${genre_elements} =    Get WebElements    xpath://span[@class="genre"]
+    @{Genre_values}=    Create List
+    FOR    ${element}    IN    @{genre_elements}
+        ${genre_value}=    get text    ${element}
+        Should Contain    ${genre_value}    ${GenreAction}    ignore_case=True
+        Append To List    ${Genre_values}    ${genre_value}
+    END
+    Log List    ${Genre_values}
     [Teardown]    Close Browser
 
 TestCase1
     [Setup]    Open Browser    https://www.imdb.com/    Chrome
+    Maximize Browser Window
     wait until page contains Element    id=suggestion-search
     input text    id=suggestion-search    ${MovieName}
     Sleep    ${Sleep Time}
@@ -60,31 +70,32 @@ TestCase1
     Wait Until Page Contains Element    xpath://*[@id="__next"]/main/div[2]/div[3]/section/div/div[1]/section[1]/h1
     ${search_results} =    Get WebElements    class:ipc-metadata-list-summary-item__t
     FOR    ${result}    IN    @{search_results}
-        Element Should Contain    ${result}    ${MovieName}
+        Element Should Contain    ${result}    ${MovieName}    ignore_case=True
     END
     Element Text Should Be    xpath://*[@id="__next"]/main/div[2]/div[3]/section/div/div[1]/section[2]/div[2]/ul/li[1]/div[2]/div/a    ${MovieName}
     [Teardown]    Close Browser
 
 TestCase2
     [Setup]    Open Browser    https://www.imdb.com/    Chrome
+    Maximize Browser Window
     wait until page contains Element    id=suggestion-search
     click element    xpath://*[@id="iconContext-menu"]
     Sleep    ${Sleep Time}
     click element    xpath://*[@id="imdbHeader"]/div[2]/aside/div/div[2]/div/div[1]/span/div/div/ul/a[2]/span
     wait until page contains element    xpath://*[@id="main"]/div/span/div/div/div[3]/table/tbody/tr[106]/td[2]
     Sleep    ${Sleep Time}
-    ${rating_elements} =    Get WebElements    class:ratingColumn imdbRating
-    ${rating_elements_count} =    Get Element Count    class:ratingColumn imdbRating
-    Log    ${rating_elements_count}
+    ${rating_elements} =    Get WebElements    xpath=//td[@class='ratingColumn imdbRating']//strong
     ${original_ratings}=    Create List
     FOR    ${rating_element}    IN    @{rating_elements}
         ${rating_attr}    get text    ${rating_element}
-        ${rating_attr}    convert to number    ${rating_attr.strip('$')}
         append to list    ${original_ratings}    ${rating_attr}
-        log    ${rating_attr}
     END
     ${copied_ratings}=    Copy List    ${original_ratings}
     Sort List    ${copied_ratings}
     reverse list    ${copied_ratings}
     Lists Should Be Equal    ${copied_ratings}    ${original_ratings}
+    ${list_length} =    Get Length    ${original_ratings}
+    Log    The length of my_list is ${list_length}
+    Element Text Should Be    //*[@id="main"]/div/span/div/div/div[3]/table/tbody/tr[1]/td[2]/a    ${MovieName}
+    Should Be Equal As Integers    ${list_length}    250
     [Teardown]    Close Browser
