@@ -10,6 +10,7 @@ ${StartYear}      2010
 ${EndYear}        2020
 ${MovieName}      The Shawshank Redemption
 ${GenreAction}    action
+${top_movie}      The Shawshank Redemption
 
 *** Test Cases ***
 TestCase3
@@ -110,6 +111,6 @@ TestCase2
     Lists Should Be Equal    ${copied_ratings}    ${original_ratings}
     ${list_length} =    Get Length    ${original_ratings}
     Log    The length of my_list is ${list_length}
-    Element Text Should Be    //*[@id="main"]/div/span/div/div/div[3]/table/tbody/tr[1]/td[2]/a    ${MovieName}
+    Element Text Should Be    //*[@id="main"]/div/span/div/div/div[3]/table/tbody/tr[1]/td[2]/a    ${top_movie}
     Should Be Equal As Integers    ${list_length}    250
     [Teardown]    Close Browser
