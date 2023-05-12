@@ -1,6 +1,7 @@
 *** Settings ***
 Library           SeleniumLibrary
 Library           Collections
+Library           BuiltIn
 
 *** Variables ***
 ${Sleep Time}     2
@@ -57,6 +58,19 @@ TestCase3
         Append To List    ${Genre_values}    ${genre_value}
     END
     Log List    ${Genre_values}
+    Log    "All films are action"
+    ${year_elements} =    Get WebElements    css=.lister-item-year.text-muted.unbold
+    @{year_values}=    Create List
+    FOR    ${element}    IN    @{year_elements}
+        ${year_value}=    Get Element Attribute    ${element}    innerHTML
+        ${year}    Set Variable    ${year_value.split("(")[-1].split(")")[0]}
+        Append To List    ${year_values}    ${year}
+    END
+    Log List    ${year_values}
+    FOR    ${year}    IN    @{year_values}
+        Run Keyword If    ${year} not in range(2010, 2021)    Fail    "${year} is not in the range 2010-2020"
+    END
+    Log    "All years are between 2010 and 2020"
     [Teardown]    Close Browser
 
 TestCase1
